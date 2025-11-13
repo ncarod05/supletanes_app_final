@@ -1,12 +1,11 @@
-package cl.supletanes.supletanes_app.service;
-
-import cl.supletanes.supletanes_app.entity.Recordatorio;
+package cl.supletanes.supletanes_app.recordatorio.service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RecordatorioService {
+import cl.supletanes.supletanes_app.recordatorio.entity.Recordatorio;
 
+public interface RecordatorioService {
     /**
      * Guarda un nuevo recordatorio.
      * @param recordatorio El recordatorio a guardar.

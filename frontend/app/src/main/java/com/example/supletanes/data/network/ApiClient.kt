@@ -7,6 +7,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
@@ -18,8 +19,11 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    // Se añaden timeouts para dar tiempo al servidor de Render a "despertar"
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
+        .connectTimeout(30, TimeUnit.SECONDS) // Aumentar timeout de conexión
+        .readTimeout(30, TimeUnit.SECONDS)    // Aumentar timeout de lectura
         .build()
 
     // Crear una instancia de Gson con el adaptador personalizado para LocalDateTime
@@ -31,7 +35,7 @@ object ApiClient {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create(gson)) // Usar el Gson personalizado
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
     // Exponer el servicio de la API para ser usado en el resto de la app

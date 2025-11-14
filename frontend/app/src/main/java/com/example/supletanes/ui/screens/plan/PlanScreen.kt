@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -25,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -33,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,8 +55,10 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
     val context = LocalContext.current
     val showCalendarDialog by planViewModel.showCalendarDialog.collectAsState()
     val showTimeDialog by planViewModel.showTimeDialog.collectAsState()
+    val showMensajeDialog by planViewModel.showMensajeDialog.collectAsState()
     val datePickerState = rememberDatePickerState()
     val timePickerState = rememberTimePickerState()
+    var mensajeRecordatorio by remember { mutableStateOf("") }
 
     val desayunoImage = remember { mutableStateOf<Bitmap?>(null) }
     val almuerzoImage = remember { mutableStateOf<Bitmap?>(null) }
@@ -104,7 +110,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                             planViewModel.onDateSelected(selectedMillis)
                         }
                     }
-                ) { Text("Confirmar") }
+                ) { Text("Siguiente") }
             },
             dismissButton = {
                 TextButton(onClick = { planViewModel.onDismissCalendar() }) { Text("Cancelar") }
@@ -120,9 +126,9 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        planViewModel.crearRecordatorio(timePickerState.hour, timePickerState.minute)
+                        planViewModel.onTimeSelected(timePickerState.hour, timePickerState.minute)
                     }
-                ) { Text("Confirmar") }
+                ) { Text("Siguiente") }
             },
             dismissButton = {
                 TextButton(onClick = { planViewModel.onDismissTimeDialog() }) { Text("Cancelar") }
@@ -130,6 +136,34 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
         ) {
             TimePicker(state = timePickerState)
         }
+    }
+
+    if (showMensajeDialog) {
+        AlertDialog(
+            onDismissRequest = { planViewModel.onDismissMensajeDialog() },
+            title = { Text("Mensaje del Recordatorio") },
+            text = {
+                Column {
+                    Text("Escribe el mensaje para tu recordatorio.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = mensajeRecordatorio,
+                        onValueChange = { mensajeRecordatorio = it },
+                        label = { Text("Mensaje") }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        planViewModel.crearRecordatorio(mensajeRecordatorio)
+                    }
+                ) { Text("Crear Recordatorio") }
+            },
+            dismissButton = {
+                TextButton(onClick = { planViewModel.onDismissMensajeDialog() }) { Text("Cancelar") }
+            }
+        )
     }
 
     val dailyGoalCalories = 2500

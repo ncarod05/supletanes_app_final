@@ -25,7 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.supletanes.ui.components.TimePickerDialog
 import com.example.supletanes.ui.screens.plan.components.CalorieTracker
 import com.example.supletanes.ui.screens.plan.components.PlanSection
 import com.example.supletanes.ui.screens.plan.components.ProgressCheckInSection
@@ -47,7 +50,9 @@ import com.example.supletanes.ui.screens.plan.viewmodel.PlanViewModel
 fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
     val context = LocalContext.current
     val showCalendarDialog by planViewModel.showCalendarDialog.collectAsState()
+    val showTimeDialog by planViewModel.showTimeDialog.collectAsState()
     val datePickerState = rememberDatePickerState()
+    val timePickerState = rememberTimePickerState()
 
     val desayunoImage = remember { mutableStateOf<Bitmap?>(null) }
     val almuerzoImage = remember { mutableStateOf<Bitmap?>(null) }
@@ -88,6 +93,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
         }
     )
 
+    // --- Diálogos ---
     if (showCalendarDialog) {
         DatePickerDialog(
             onDismissRequest = { planViewModel.onDismissCalendar() },
@@ -95,7 +101,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { selectedMillis ->
-                            planViewModel.crearRecordatorio(selectedMillis)
+                            planViewModel.onDateSelected(selectedMillis)
                         }
                     }
                 ) { Text("Confirmar") }
@@ -105,6 +111,24 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         ) {
             DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showTimeDialog) {
+        TimePickerDialog(
+            onDismissRequest = { planViewModel.onDismissTimeDialog() },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        planViewModel.crearRecordatorio(timePickerState.hour, timePickerState.minute)
+                    }
+                ) { Text("Confirmar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { planViewModel.onDismissTimeDialog() }) { Text("Cancelar") }
+            }
+        ) {
+            TimePicker(state = timePickerState)
         }
     }
 

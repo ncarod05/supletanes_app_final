@@ -13,13 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.example.supletanes.notifications.RecordatorioCal
 import com.example.supletanes.ui.navigation.AppNavigation
 import com.example.supletanes.ui.theme.SupletanesTheme
 import com.example.supletanes.utils.NotificationHelper
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
@@ -37,8 +33,7 @@ class MainActivity : ComponentActivity() {
         askPermissions()
         NotificationHelper.createNotificationChannel(this)
 
-        val workRequest = PeriodicWorkRequestBuilder<RecordatorioCal>(120, TimeUnit.SECONDS).build()
-        WorkManager.getInstance(applicationContext).enqueue(workRequest)
+        // El código de WorkManager ha sido eliminado ya que ahora usamos el backend.
 
         enableEdgeToEdge()
         setContent {

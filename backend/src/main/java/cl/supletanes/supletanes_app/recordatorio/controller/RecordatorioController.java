@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/recordatorios")
+@RequestMapping("/api/v1/recordatorios") // <-- CORREGIDO
 @Tag(name = "Recordatorios", description = "Gestión de recordatorios personales por usuario")
 public class RecordatorioController {
 

@@ -6,6 +6,13 @@ import java.util.Optional;
 import cl.supletanes.supletanes_app.recordatorio.entity.Recordatorio;
 
 public interface RecordatorioService {
+
+    /**
+     * Obtiene todos los recordatorios de la base de datos.
+     * @return Una lista con todos los recordatorios.
+     */
+    List<Recordatorio> obtenerTodosLosRecordatorios();
+
     /**
      * Guarda un nuevo recordatorio.
      * @param recordatorio El recordatorio a guardar.

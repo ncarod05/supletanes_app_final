@@ -16,6 +16,11 @@ public class RecordatorioServiceImpl implements RecordatorioService {
     private RecordatorioRepository recordatorioRepository;
 
     @Override
+    public List<Recordatorio> obtenerTodosLosRecordatorios() {
+        return recordatorioRepository.findAll();
+    }
+
+    @Override
     public Recordatorio crearRecordatorio(Recordatorio recordatorio) {
         return recordatorioRepository.save(recordatorio);
     }

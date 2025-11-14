@@ -28,6 +28,16 @@ public class RecordatorioController {
     @Autowired
     private RecordatorioService recordatorioService;
 
+    @Operation(summary = "Obtener todos los recordatorios (Global)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de todos los recordatorios obtenida exitosamente")
+    })
+    @GetMapping
+    public ResponseEntity<List<Recordatorio>> obtenerTodosLosRecordatorios() {
+        List<Recordatorio> recordatorios = recordatorioService.obtenerTodosLosRecordatorios();
+        return ResponseEntity.ok(recordatorios);
+    }
+
     @Operation(summary = "Crear un nuevo recordatorio")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Recordatorio creado exitosamente"),

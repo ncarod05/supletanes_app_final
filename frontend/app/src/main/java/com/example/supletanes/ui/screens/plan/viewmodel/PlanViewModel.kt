@@ -1,7 +1,9 @@
 package com.example.supletanes.ui.screens.plan.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.supletanes.data.model.Recordatorio
 import com.example.supletanes.data.network.ApiClient
@@ -14,8 +16,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.util.UUID
 
-class PlanViewModel : ViewModel() {
+class PlanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _showCalendarDialog = MutableStateFlow(false)
     val showCalendarDialog = _showCalendarDialog.asStateFlow()
@@ -23,7 +26,25 @@ class PlanViewModel : ViewModel() {
     private val _showTimeDialog = MutableStateFlow(false)
     val showTimeDialog = _showTimeDialog.asStateFlow()
 
+    private val _showMensajeDialog = MutableStateFlow(false)
+    val showMensajeDialog = _showMensajeDialog.asStateFlow()
+
     private var _selectedDate: LocalDate? = null
+    private var _selectedDateTime: LocalDateTime? = null
+
+    // Lógica para obtener/crear un ID de dispositivo único
+    private fun getDeviceUserId(): String {
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            "app_prefs",
+            Context.MODE_PRIVATE
+        )
+        var userId = sharedPreferences.getString("user_id", null)
+        if (userId == null) {
+            userId = UUID.randomUUID().toString()
+            sharedPreferences.edit().putString("user_id", userId).apply()
+        }
+        return userId
+    }
 
     fun onCalendarIconClick() {
         _showCalendarDialog.update { true }
@@ -37,26 +58,34 @@ class PlanViewModel : ViewModel() {
         _showTimeDialog.update { false }
     }
 
+    fun onDismissMensajeDialog() {
+        _showMensajeDialog.update { false }
+    }
+
     fun onDateSelected(dateInMillis: Long) {
-        // Guardamos la fecha seleccionada y mostramos el diálogo de la hora
         _selectedDate = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         _showCalendarDialog.update { false }
         _showTimeDialog.update { true }
     }
 
-    // Nueva función para crear el recordatorio llamando a la API
-    fun crearRecordatorio(hour: Int, minute: Int) {
+    fun onTimeSelected(hour: Int, minute: Int) {
+        _selectedDate?.let {
+            _selectedDateTime = LocalDateTime.of(it, LocalTime.of(hour, minute))
+        }
         _showTimeDialog.update { false }
+        _showMensajeDialog.update { true }
+    }
 
-        _selectedDate?.let { date ->
-            val fechaHora = LocalDateTime.of(date, LocalTime.of(hour, minute))
+    fun crearRecordatorio(mensaje: String) {
+        _showMensajeDialog.update { false }
 
+        _selectedDateTime?.let { fechaHora ->
             viewModelScope.launch {
                 try {
                     val nuevoRecordatorio = Recordatorio(
-                        id = 0, // El ID será generado por el backend
-                        idUsuario = "user123", // TODO: Reemplazar con el ID del usuario real
-                        mensaje = "Recordatorio de tu plan.",
+                        id = 0,
+                        idUsuario = getDeviceUserId(), // Usamos el ID de dispositivo único
+                        mensaje = mensaje,
                         fechaHora = fechaHora
                     )
 

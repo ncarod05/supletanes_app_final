@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,18 @@ public class RecordatorioController {
     public ResponseEntity<Recordatorio> crearRecordatorio(@RequestBody Recordatorio recordatorio) {
         Recordatorio nuevoRecordatorio = recordatorioService.crearRecordatorio(recordatorio);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoRecordatorio);
+    }
+
+    @Operation(summary = "Actualizar un recordatorio existente")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Recordatorio actualizado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Recordatorio no encontrado")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<Recordatorio> actualizarRecordatorio(@PathVariable Long id, @RequestBody Recordatorio recordatorioActualizado) {
+        return recordatorioService.actualizarRecordatorio(id, recordatorioActualizado)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Obtener todos los recordatorios de un usuario")

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
@@ -34,6 +35,7 @@ fun ProfileScreen(
     isGuest: Boolean,
     user: UserProfile?,
     onNavigateToAuth: () -> Unit,
+    onNavigateToRecordatorioHistorial: () -> Unit, // Nuevo parámetro
     onChangeNameClicked: () -> Unit = {},
     onChangePasswordClicked: () -> Unit = {},
     onPrivacyClicked: () -> Unit = {},
@@ -54,10 +56,10 @@ fun ProfileScreen(
         user?.let {
             LoggedInProfileScreen(
                 user = it,
-                // Creamos un nuevo lambda para el botón de logout.
                 onLogoutClicked = {
                     profileViewModel.logout(onNavigateToAuth)
                 },
+                onNavigateToRecordatorioHistorial = onNavigateToRecordatorioHistorial, // Pasarlo
                 onChangeNameClicked = onChangeNameClicked,
                 onChangePasswordClicked = onChangePasswordClicked,
                 onPrivacyClicked = onPrivacyClicked
@@ -70,6 +72,7 @@ fun ProfileScreen(
 private fun LoggedInProfileScreen(
     user: UserProfile,
     onLogoutClicked: () -> Unit,
+    onNavigateToRecordatorioHistorial: () -> Unit, // Nuevo parámetro
     onChangeNameClicked: () -> Unit,
     onChangePasswordClicked: () -> Unit,
     onPrivacyClicked: () -> Unit
@@ -124,6 +127,12 @@ private fun LoggedInProfileScreen(
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         )
 
+        // Nuevo item para el historial
+        ProfileItem(
+            icon = Icons.Default.History,
+            title = "Historial de Recordatorios",
+            onClick = onNavigateToRecordatorioHistorial
+        )
         ProfileItem(
             icon = Icons.Default.Lock,
             title = "Privacidad",
@@ -221,7 +230,8 @@ fun LoggedInProfileScreenPreview() {
     ProfileScreen(
         isGuest = false,
         user = UserProfile(name = "Usuario de Prueba", email = "preview@email.com"),
-        onNavigateToAuth = {}
+        onNavigateToAuth = {},
+        onNavigateToRecordatorioHistorial = {} // Añadir para el preview
     )
 }
 
@@ -232,7 +242,7 @@ fun GuestProfileScreenPreview() {
     ProfileScreen(
         isGuest = true,
         user = null,
-        onNavigateToAuth = {}
+        onNavigateToAuth = {},
+        onNavigateToRecordatorioHistorial = {} // Añadir para el preview
     )
 }
-

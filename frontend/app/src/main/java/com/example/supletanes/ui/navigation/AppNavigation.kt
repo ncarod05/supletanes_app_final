@@ -20,6 +20,7 @@ import com.example.supletanes.ui.screens.main.MainScreen
 import com.example.supletanes.ui.screens.profile.screens.ChangeNameScreen
 import com.example.supletanes.ui.screens.profile.screens.ChangePasswordScreen
 import com.example.supletanes.ui.screens.profile.screens.PrivacyScreen
+import com.example.supletanes.ui.screens.recordatorio.RecordatorioHistorialScreen
 import com.example.supletanes.ui.screens.welcome.WelcomeScreen
 
 @Composable
@@ -94,9 +95,23 @@ fun AppNavigation() {
                         popUpTo(Screen.Main.route) { inclusive = true }
                     }
                 },
+                onNavigateToRecordatorioHistorial = { navController.navigate(Screen.RecordatorioHistorial.route) },
                 onChangeNameClicked = { navController.navigate(Screen.ChangeName.route) },
                 onChangePasswordClicked = { navController.navigate(Screen.ChangePassword.route) },
                 onPrivacyClicked = { navController.navigate(Screen.Privacy.route) }
+            )
+        }
+
+        // --- Pantalla de Historial de Recordatorios ---
+        composable(
+            route = Screen.RecordatorioHistorial.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = animationSpec) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = animationSpec) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = animationSpec) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = animationSpec) }
+        ) {
+            RecordatorioHistorialScreen(
+                onNavigateToCreate = { navController.popBackStack() } // Vuelve a la pantalla anterior (MainScreen)
             )
         }
 

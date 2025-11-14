@@ -26,6 +26,15 @@ public class RecordatorioServiceImpl implements RecordatorioService {
     }
 
     @Override
+    public Optional<Recordatorio> actualizarRecordatorio(Long id, Recordatorio recordatorioActualizado) {
+        return recordatorioRepository.findById(id).map(recordatorioExistente -> {
+            recordatorioExistente.setMensaje(recordatorioActualizado.getMensaje());
+            recordatorioExistente.setFechaHora(recordatorioActualizado.getFechaHora());
+            return recordatorioRepository.save(recordatorioExistente);
+        });
+    }
+
+    @Override
     public List<Recordatorio> obtenerRecordatoriosPorUsuario(String idUsuario) {
         return recordatorioRepository.findByIdUsuario(idUsuario);
     }

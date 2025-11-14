@@ -21,6 +21,14 @@ public interface RecordatorioService {
     Recordatorio crearRecordatorio(Recordatorio recordatorio);
 
     /**
+     * Actualiza un recordatorio existente.
+     * @param id El ID del recordatorio a actualizar.
+     * @param recordatorioActualizado Los nuevos datos para el recordatorio.
+     * @return El recordatorio actualizado.
+     */
+    Optional<Recordatorio> actualizarRecordatorio(Long id, Recordatorio recordatorioActualizado);
+
+    /**
      * Obtiene todos los recordatorios para un ID de usuario específico.
      * @param idUsuario El ID del usuario.
      * @return Una lista de recordatorios.

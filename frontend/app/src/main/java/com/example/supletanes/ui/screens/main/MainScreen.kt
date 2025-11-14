@@ -44,6 +44,7 @@ fun MainScreen(
     userProfile: UserProfile?,
     onLogoutClicked: () -> Unit,
     onLoginClicked: () -> Unit,
+    onNavigateToRecordatorioHistorial: () -> Unit, // Nuevo parámetro
     onChangeNameClicked: () -> Unit,
     onChangePasswordClicked: () -> Unit,
     onPrivacyClicked: () -> Unit
@@ -109,6 +110,7 @@ fun MainScreen(
                         user = userProfile,
                         onNavigateToAuth = onLogoutClicked,
                         onLoginClicked = onLoginClicked,
+                        onNavigateToRecordatorioHistorial = onNavigateToRecordatorioHistorial, // Pasarlo aquí
                         onChangeNameClicked = onChangeNameClicked,
                         onChangePasswordClicked = onChangePasswordClicked,
                         onPrivacyClicked = onPrivacyClicked

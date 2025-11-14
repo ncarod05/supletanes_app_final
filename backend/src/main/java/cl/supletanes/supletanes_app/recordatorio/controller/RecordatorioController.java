@@ -15,29 +15,46 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cl.supletanes.supletanes_app.recordatorio.entity.Recordatorio;
 import cl.supletanes.supletanes_app.recordatorio.service.RecordatorioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/recordatorios")
+@Tag(name = "Recordatorios", description = "Gestión de recordatorios personales por usuario")
 public class RecordatorioController {
 
     @Autowired
     private RecordatorioService recordatorioService;
 
-    // Endpoint para CREAR un nuevo recordatorio
+    @Operation(summary = "Crear un nuevo recordatorio")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Recordatorio creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    })
     @PostMapping
     public ResponseEntity<Recordatorio> crearRecordatorio(@RequestBody Recordatorio recordatorio) {
         Recordatorio nuevoRecordatorio = recordatorioService.crearRecordatorio(recordatorio);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoRecordatorio);
     }
 
-    // Endpoint para OBTENER todos los recordatorios de un usuario
+    @Operation(summary = "Obtener todos los recordatorios de un usuario")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de recordatorios obtenida exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<List<Recordatorio>> obtenerRecordatoriosPorUsuario(@PathVariable String idUsuario) {
         List<Recordatorio> recordatorios = recordatorioService.obtenerRecordatoriosPorUsuario(idUsuario);
         return ResponseEntity.ok(recordatorios);
     }
 
-    // Endpoint para ELIMINAR un recordatorio
+    @Operation(summary = "Eliminar un recordatorio por ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Recordatorio eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Recordatorio no encontrado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarRecordatorio(@PathVariable Long id) {
         if (recordatorioService.obtenerRecordatorioPorId(id).isPresent()) {

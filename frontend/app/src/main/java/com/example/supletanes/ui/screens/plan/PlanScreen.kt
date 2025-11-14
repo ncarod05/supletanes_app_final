@@ -27,29 +27,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import com.example.supletanes.notifications.RecordatorioCal
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.supletanes.ui.screens.plan.components.CalorieTracker
 import com.example.supletanes.ui.screens.plan.components.PlanSection
 import com.example.supletanes.ui.screens.plan.components.ProgressCheckInSection
 import com.example.supletanes.ui.screens.plan.components.WeekTimeline
-import java.util.concurrent.TimeUnit
+import com.example.supletanes.ui.screens.plan.viewmodel.PlanViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanScreen() {
+fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
     val context = LocalContext.current
-    var showCalendarDialog by remember { mutableStateOf(false) }
+    val showCalendarDialog by planViewModel.showCalendarDialog.collectAsState()
     val datePickerState = rememberDatePickerState()
 
     val desayunoImage = remember { mutableStateOf<Bitmap?>(null) }
@@ -93,27 +90,18 @@ fun PlanScreen() {
 
     if (showCalendarDialog) {
         DatePickerDialog(
-            onDismissRequest = { showCalendarDialog = false },
+            onDismissRequest = { planViewModel.onDismissCalendar() },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showCalendarDialog = false
                         datePickerState.selectedDateMillis?.let { selectedMillis ->
-                            val now = System.currentTimeMillis()
-                            val delay = selectedMillis - now
-                            if (delay > 0) {
-                                val workRequest = OneTimeWorkRequestBuilder<RecordatorioCal>()
-                                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                                    .setInputData(Data.Builder().putString("KEY_MESSAGE", "Recordatorio de tu plan.").build())
-                                    .build()
-                                WorkManager.getInstance(context).enqueue(workRequest)
-                            }
+                            planViewModel.crearRecordatorio(selectedMillis)
                         }
                     }
                 ) { Text("Confirmar") }
             },
             dismissButton = {
-                TextButton(onClick = { showCalendarDialog = false }) { Text("Cancelar") }
+                TextButton(onClick = { planViewModel.onDismissCalendar() }) { Text("Cancelar") }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -138,7 +126,7 @@ fun PlanScreen() {
 
         item {
             Button(
-                onClick = { showCalendarDialog = true },
+                onClick = { planViewModel.onCalendarIconClick() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(imageVector = Icons.Default.DateRange, contentDescription = "Crear Recordatorio")

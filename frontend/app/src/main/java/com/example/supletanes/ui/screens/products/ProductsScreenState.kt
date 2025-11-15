@@ -1,70 +1,73 @@
 package com.example.supletanes.ui.screens.products
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.supletanes.data.db.entities.Suplemento
-import com.example.supletanes.ui.screens.products.viewmodel.SuplementoViewModel
+import com.example.supletanes.data.model.Producto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 data class ProductsScreenState(
-    val suplementos: List<Suplemento>,
-    val visibleItems: MutableMap<Int, Boolean>,
-    val editedItemId: MutableState<Int?>,
+    val productos: List<Producto>,
+    val visibleItems: MutableMap<Long, Boolean>,
+    val editedItemId: MutableState<Long?>,
     val showDialog: Boolean,
-    val suplementoAEditar: Suplemento?,
+    val productoAEditar: Producto?,
     val onShowDialogChange: (Boolean) -> Unit,
-    val onEditChange: (Suplemento?) -> Unit,
-    val onEditedItem: (Int) -> Unit,
-    val mostrarSnackbarConDeshacer: (Suplemento) -> Unit
+    val onEditChange: (Producto?) -> Unit,
+    val onEditedItem: (Long) -> Unit,
+    val mostrarSnackbarConDeshacer: (Producto) -> Unit
 )
 
 @Composable
 fun rememberProductsScreenState(
-    viewModel: SuplementoViewModel,
+    productos: List<Producto>,
     snackbarHostState: SnackbarHostState,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    onRestoreProducto: (Producto) -> Unit
 ): ProductsScreenState {
-    val suplementos by viewModel.allSupplements.collectAsState(initial = emptyList())
-    val visibleItems = remember { mutableStateMapOf<Int, Boolean>() }
-    val editedItemId = remember { mutableStateOf<Int?>(null) }
+    val visibleItems = remember { mutableStateMapOf<Long, Boolean>() }
+    val editedItemId = remember { mutableStateOf<Long?>(null) }
     var showDialog by remember { mutableStateOf(false) }
-    var suplementoAEditar by remember { mutableStateOf<Suplemento?>(null) }
+    var productoAEditar by remember { mutableStateOf<Producto?>(null) }
 
-    LaunchedEffect(suplementos) {
-        suplementos.forEach { suplemento ->
-            visibleItems[suplemento.id] = true
+    // Inicializar visibilidad de items
+    LaunchedEffect(productos) {
+        productos.forEach { producto ->
+            if (!visibleItems.containsKey(producto.id)) {
+                visibleItems[producto.id] = true
+            }
         }
     }
 
-    val mostrarSnackbarConDeshacer: (Suplemento) -> Unit = { suplemento ->
+    val mostrarSnackbarConDeshacer: (Producto) -> Unit = { producto ->
         scope.launch {
             val result = snackbarHostState.showSnackbar(
-                message = "${suplemento.nombre} eliminado",
+                message = "${producto.nombre} eliminado",
                 actionLabel = "Deshacer"
             )
-            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
-                viewModel.insert(suplemento)
+            if (result == SnackbarResult.ActionPerformed) {
+                onRestoreProducto(producto)
+                visibleItems[producto.id] = true
             }
         }
     }
 
     return ProductsScreenState(
-        suplementos = suplementos,
+        productos = productos,
         visibleItems = visibleItems,
         editedItemId = editedItemId,
         showDialog = showDialog,
-        suplementoAEditar = suplementoAEditar,
+        productoAEditar = productoAEditar,
         onShowDialogChange = { showDialog = it },
-        onEditChange = { suplementoAEditar = it },
+        onEditChange = { productoAEditar = it },
         onEditedItem = { editedItemId.value = it },
         mostrarSnackbarConDeshacer = mostrarSnackbarConDeshacer
     )

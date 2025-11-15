@@ -2,6 +2,7 @@ package com.example.supletanes.data.network
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.supletanes.data.api.ProductoApiService
 import com.example.supletanes.data.network.adapter.LocalDateTimeAdapter
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -41,8 +42,13 @@ object ApiClient {
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
-    // Exponer el servicio de la API para ser usado en el resto de la app
+    // Exponer el servicio de Recordatorio
     val recordatorioApiService: RecordatorioApiService by lazy {
         retrofit.create(RecordatorioApiService::class.java)
+    }
+
+    // Exponer el servicio de Producto
+    val productoApiService: ProductoApiService by lazy {
+        retrofit.create(ProductoApiService::class.java)
     }
 }

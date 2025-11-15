@@ -2,38 +2,56 @@
 
 package com.example.supletanes.ui.screens.products
 
-import android.app.Application
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.supletanes.ui.screens.products.viewmodel.SuplementoViewModel
-import com.example.supletanes.ui.screens.products.viewmodel.SuplementoViewModelFactory
+import com.example.supletanes.ui.screens.products.components.ProductsScaffold
+import com.example.supletanes.ui.screens.products.viewmodel.ProductoViewModel
 
 @Composable
-fun ProductsScreen() {
-    val viewModel: SuplementoViewModel = viewModel(
-        factory = SuplementoViewModelFactory(LocalContext.current.applicationContext as Application)
-    )
+fun ProductsScreen(viewModel: ProductoViewModel = viewModel()) {
+
+    val productos by viewModel.allProducts.collectAsState()
+    val mensajeSnackbar by viewModel.mensajeSnackbar.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    // Mostrar mensajes de error en Snackbar
+    LaunchedEffect(mensajeSnackbar) {
+        mensajeSnackbar?.let { mensaje ->
+            snackbarHostState.showSnackbar(mensaje)
+            viewModel.limpiarMensaje()
+        }
+    }
+
     val state = rememberProductsScreenState(
-        viewModel = viewModel,
+        productos = productos,
         snackbarHostState = snackbarHostState,
-        scope = scope
+        scope = scope,
+        onRestoreProducto = { producto ->
+            viewModel.insert(producto)
+        }
     )
 
     ProductsScaffold(
         state = state,
         snackbarHostState = snackbarHostState,
         scope = scope,
-        onAddSupplement = { viewModel.insert(it) },
-        onUpdateSupplement = { viewModel.update(it) },
-        onDeleteSupplement = { viewModel.delete(it.id) }
+        onAddProduct = { producto ->
+            viewModel.insert(producto)
+        },
+        onUpdateProduct = { producto ->
+            viewModel.update(producto)
+        },
+        onDeleteProduct = { producto ->
+            viewModel.delete(producto.id)
+        }
     )
 }

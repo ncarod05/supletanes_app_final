@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.compose.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

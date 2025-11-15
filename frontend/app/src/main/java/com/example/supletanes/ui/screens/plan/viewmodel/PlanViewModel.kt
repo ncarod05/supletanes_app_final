@@ -2,12 +2,16 @@ package com.example.supletanes.ui.screens.plan.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.supletanes.data.model.Recordatorio
+import com.example.supletanes.data.model.RecordatorioRequest
 import com.example.supletanes.data.network.ApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,6 +35,13 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
 
     private var _selectedDate: LocalDate? = null
     private var _selectedDateTime: LocalDateTime? = null
+
+    // Estados para mensajes
+    private val _mensajeExito = MutableStateFlow<String?>(null)
+    val mensajeExito: StateFlow<String?> = _mensajeExito.asStateFlow()
+
+    private val _mensajeError = MutableStateFlow<String?>(null)
+    val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
 
     // Lógica para obtener/crear un ID de dispositivo único
     private fun getDeviceUserId(): String {
@@ -62,12 +73,14 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
         _showMensajeDialog.update { false }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onDateSelected(dateInMillis: Long) {
         _selectedDate = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         _showCalendarDialog.update { false }
         _showTimeDialog.update { true }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onTimeSelected(hour: Int, minute: Int) {
         _selectedDate?.let {
             _selectedDateTime = LocalDateTime.of(it, LocalTime.of(hour, minute))
@@ -82,9 +95,8 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
         _selectedDateTime?.let { fechaHora ->
             viewModelScope.launch {
                 try {
-                    val nuevoRecordatorio = Recordatorio(
-                        id = 0,
-                        idUsuario = getDeviceUserId(), // Usamos el ID de dispositivo único
+                    val nuevoRecordatorio = RecordatorioRequest(
+                        idUsuario = getDeviceUserId(),
                         mensaje = mensaje,
                         fechaHora = fechaHora
                     )
@@ -92,13 +104,21 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
                     val response = ApiClient.recordatorioApiService.crearRecordatorio(nuevoRecordatorio)
 
                     if (response.isSuccessful) {
-                        Log.d("PlanViewModel", "Recordatorio creado con éxito: ${response.body()}")
+                        val recordatorio = response.body()
+                        Log.d("PlanViewModel", "Recordatorio creado con éxito: $recordatorio")
+
+                        // mostrar mensaje de éxito al usuario
+                        _mensajeExito.update { "Recordatorio creado exitosamente" }
                     } else {
-                        Log.e("PlanViewModel", "Error al crear recordatorio: ${response.errorBody()?.string()}")
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("PlanViewModel", "Error al crear recordatorio: $errorBody")
+
+                        _mensajeError.update { "Error al crear recordatorio: ${response.code()}" }
                     }
 
                 } catch (e: Exception) {
                     Log.e("PlanViewModel", "Excepción al crear recordatorio", e)
+                    _mensajeError.update { "Error de conexión: ${e.message}" }
                 }
             }
         }

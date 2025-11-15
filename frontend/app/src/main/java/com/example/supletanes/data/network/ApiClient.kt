@@ -1,5 +1,7 @@
 package com.example.supletanes.data.network
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.supletanes.data.network.adapter.LocalDateTimeAdapter
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -27,6 +29,7 @@ object ApiClient {
         .build()
 
     // Crear una instancia de Gson con el adaptador personalizado para LocalDateTime
+    @RequiresApi(Build.VERSION_CODES.O)
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
         .create()

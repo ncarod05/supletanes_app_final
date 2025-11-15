@@ -2,9 +2,8 @@ package com.example.supletanes.data.model
 
 import java.time.LocalDateTime
 
-data class Recordatorio(
-    val id: Long,
+data class RecordatorioRequest(
+    val fechaHora: LocalDateTime,
     val idUsuario: String,
-    val mensaje: String,
-    val fechaHora: LocalDateTime
+    val mensaje: String
 )

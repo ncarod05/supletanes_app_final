@@ -43,7 +43,7 @@ class ProductoViewModel : ViewModel() {
                     Log.e("ProductoViewModel", "Error al cargar productos", error)
                     _mensajeSnackbar.update {
                         if (error is java.net.SocketTimeoutException) {
-                            "Timeout al cargar productos, el servidor esta despetando aún"
+                            "Timeout al cargar productos, el servidor esta despertando aún"
                         } else {
                             "Error al cargar productos"
                         }

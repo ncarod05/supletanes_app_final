@@ -1,132 +1,150 @@
 package com.example.supletanes.ui.screens.recordatorio
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.app.Application
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.supletanes.data.model.Recordatorio
+import com.example.supletanes.ui.components.TimePickerDialog
 import com.example.supletanes.ui.screens.recordatorio.viewmodel.RecordatorioHistorialViewModel
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordatorioHistorialScreen(
-    historialViewModel: RecordatorioHistorialViewModel = viewModel(),
-    onNavigateToCreate: () -> Unit
-) {
-    val uiState by historialViewModel.uiState.collectAsState()
+fun RecordatorioHistorialScreen() {
+    val context = LocalContext.current
+    val viewModel: RecordatorioHistorialViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return RecordatorioHistorialViewModel(context.applicationContext as Application) as T
+            }
+        }
+    )
+
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Dialog states from ViewModel
+    val showCalendarDialog by viewModel.showCalendarDialog.collectAsState()
+    val showTimeDialog by viewModel.showTimeDialog.collectAsState()
+    val showMensajeDialog by viewModel.showMensajeDialog.collectAsState()
+
+    // States for the pickers and dialogs
+    val datePickerState = rememberDatePickerState()
+    val timePickerState = rememberTimePickerState()
+    var mensajeRecordatorio by remember { mutableStateOf("") }
+
+    LaunchedEffect(uiState.snackbarMessage) {
+        uiState.snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.limpiarMensaje()
+        }
+    }
+
+    // --- Dialogs (reusing PlanScreen's logic) ---
+    if (showCalendarDialog) {
+        DatePickerDialog(
+            onDismissRequest = { viewModel.onDismissCalendar() },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedMillis ->
+                            viewModel.onDateSelected(selectedMillis)
+                        }
+                    }
+                ) { Text("Siguiente") }
+            },
+            dismissButton = { TextButton(onClick = { viewModel.onDismissCalendar() }) { Text("Cancelar") } }
+        ) { DatePicker(state = datePickerState) }
+    }
+
+    if (showTimeDialog) {
+        TimePickerDialog(
+            onDismissRequest = { viewModel.onDismissTimeDialog() },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.onTimeSelected(timePickerState.hour, timePickerState.minute) }
+                ) { Text("Siguiente") }
+            },
+            dismissButton = { TextButton(onClick = { viewModel.onDismissTimeDialog() }) { Text("Cancelar") } }
+        ) { TimePicker(state = timePickerState) }
+    }
+
+    if (showMensajeDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDismissMensajeDialog() },
+            title = { Text("Mensaje del Recordatorio") },
+            text = {
+                Column {
+                    Text("Escribe el mensaje para tu recordatorio.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = mensajeRecordatorio,
+                        onValueChange = { mensajeRecordatorio = it },
+                        label = { Text("Mensaje") }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.crearRecordatorio(mensajeRecordatorio) }) { Text("Crear") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onDismissMensajeDialog() }) { Text("Cancelar") }
+            }
+        )
+    }
+
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Historial de Recordatorios") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToCreate) {
+            FloatingActionButton(onClick = { viewModel.onCalendarIconClick() }) {
                 Icon(Icons.Default.Add, contentDescription = "Crear Recordatorio")
             }
         }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            }
-
-            uiState.error?.let {
-                Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
-            }
-
-            if (!uiState.isLoading && uiState.recordatorios.isEmpty()) {
-                Text("No hay recordatorios.")
-            }
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp)
-            ) {
-                items(uiState.recordatorios, key = { it.id }) {
-                    RecordatorioItem(recordatorio = it, onDelete = {
-                        historialViewModel.eliminarRecordatorio(it.id)
-                    })
-                    Spacer(modifier = Modifier.height(8.dp))
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            if (uiState.isLoading && uiState.recordatorios.isEmpty()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (uiState.recordatorios.isEmpty()) {
+                Text("No tienes recordatorios.", modifier = Modifier.align(Alignment.Center), textAlign = TextAlign.Center)
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp)) {
+                    items(uiState.recordatorios) { recordatorio ->
+                        Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(recordatorio.mensaje, style = MaterialTheme.typography.bodyLarge)
+                                Spacer(Modifier.height(4.dp))
+                                val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
+                                Text(recordatorio.fechaHora.format(formatter), style = MaterialTheme.typography.bodySmall)
+                                Row(modifier = Modifier.align(Alignment.End)) {
+                                    IconButton(onClick = { /* TODO: Implement edit logic */ }) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Editar")
+                                    }
+                                    IconButton(onClick = { viewModel.eliminarRecordatorio(recordatorio.id) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun RecordatorioItem(
-    recordatorio: Recordatorio,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = recordatorio.mensaje,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = recordatorio.fechaHora.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

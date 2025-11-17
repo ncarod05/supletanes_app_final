@@ -110,9 +110,7 @@ fun AppNavigation() {
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = animationSpec) },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = animationSpec) }
         ) {
-            RecordatorioHistorialScreen(
-                onNavigateToCreate = { navController.popBackStack() } // Vuelve a la pantalla anterior (MainScreen)
-            )
+            RecordatorioHistorialScreen() // No more params needed
         }
 
         // --- Pantallas Secundarias (Formularios de Perfil) ---

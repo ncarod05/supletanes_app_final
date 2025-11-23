@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,20 +46,39 @@ fun RecordatorioHistorialScreen() {
     val showCalendarDialog by viewModel.showCalendarDialog.collectAsState()
     val showTimeDialog by viewModel.showTimeDialog.collectAsState()
     val showMensajeDialog by viewModel.showMensajeDialog.collectAsState()
+    val showEditDialog by viewModel.showEditDialog.collectAsState()
 
     // States for the pickers and dialogs
     val datePickerState = rememberDatePickerState()
     val timePickerState = rememberTimePickerState()
     var mensajeRecordatorio by remember { mutableStateOf("") }
+    
+    // Estado local para mensaje en edición
+    var mensajeEdicion by remember { mutableStateOf("") }
+
+    // Efecto para sincronizar mensaje al abrir edición
+    LaunchedEffect(showEditDialog) {
+        if (showEditDialog) {
+            mensajeEdicion = viewModel.recordatorioEnEdicion?.mensaje ?: ""
+        }
+    }
 
     LaunchedEffect(uiState.snackbarMessage) {
-        uiState.snackbarMessage?.let {
-            snackbarHostState.showSnackbar(it)
+        uiState.snackbarMessage?.let { message ->
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = if (uiState.showUndoAction) "DESHACER" else null,
+                duration = SnackbarDuration.Short
+            )
+            
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.deshacerEliminacion()
+            }
             viewModel.limpiarMensaje()
         }
     }
 
-    // --- Dialogs (reusing PlanScreen's logic) ---
+    // --- Dialogs (reusing PlanScreen's logic + Edit logic) ---
     if (showCalendarDialog) {
         DatePickerDialog(
             onDismissRequest = { viewModel.onDismissCalendar() },
@@ -86,6 +107,7 @@ fun RecordatorioHistorialScreen() {
         ) { TimePicker(state = timePickerState) }
     }
 
+    // Dialogo de Creación
     if (showMensajeDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.onDismissMensajeDialog() },
@@ -102,10 +124,56 @@ fun RecordatorioHistorialScreen() {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.crearRecordatorio(mensajeRecordatorio) }) { Text("Crear") }
+                TextButton(onClick = { 
+                    viewModel.crearRecordatorio(mensajeRecordatorio)
+                    mensajeRecordatorio = "" // Limpiar campo
+                }) { Text("Crear") }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onDismissMensajeDialog() }) { Text("Cancelar") }
+            }
+        )
+    }
+    
+    // Dialogo de Edición
+    if (showEditDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDismissEditDialog() },
+            title = { Text("Editar Recordatorio") },
+            text = {
+                Column {
+                    TextField(
+                        value = mensajeEdicion,
+                        onValueChange = { mensajeEdicion = it },
+                        label = { Text("Mensaje") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    val fechaHora = viewModel.getFechaHoraEdicion()
+                    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
+                    Text("Fecha y Hora: ${fechaHora?.format(formatter) ?: "No definida"}", style = MaterialTheme.typography.bodyMedium)
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = { viewModel.onChangeDateClick() }) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                            Spacer(Modifier.width(4.dp))
+                            Text("Fecha")
+                        }
+                        OutlinedButton(onClick = { viewModel.onChangeTimeClick() }) {
+                            Icon(Icons.Default.Schedule, contentDescription = null)
+                            Spacer(Modifier.width(4.dp))
+                            Text("Hora")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.guardarEdicion(mensajeEdicion) }) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onDismissEditDialog() }) { Text("Cancelar") }
             }
         )
     }
@@ -134,10 +202,10 @@ fun RecordatorioHistorialScreen() {
                                 val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
                                 Text(recordatorio.fechaHora.format(formatter), style = MaterialTheme.typography.bodySmall)
                                 Row(modifier = Modifier.align(Alignment.End)) {
-                                    IconButton(onClick = { /* TODO: Implement edit logic */ }) {
+                                    IconButton(onClick = { viewModel.onEditClick(recordatorio) }) {
                                         Icon(Icons.Default.Edit, contentDescription = "Editar")
                                     }
-                                    IconButton(onClick = { viewModel.eliminarRecordatorio(recordatorio.id) }) {
+                                    IconButton(onClick = { viewModel.eliminarRecordatorio(recordatorio) }) {
                                         Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                                     }
                                 }

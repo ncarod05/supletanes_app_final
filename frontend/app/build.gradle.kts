@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.spring'
 }
 
 android {
@@ -101,4 +103,20 @@ dependencies {
     // Material Dialogs for Date/Time pickers
     implementation("io.github.vanpra.compose-material-dialogs:core:0.9.0")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+
+    // Implements para los test Kotest
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+    testImplementation("io.kotest:kotest-extensions-spring:5.8.0")
+
+    // MockK
+    testImplementation 'io.mockk:mockk:1.13.8' // O la versión más reciente
+
+    // Para probar corrutinas
+    testImplementation 'org.jetbrains.kotlinx:kotlinx
+}
+
+// Configuración para que JUnit 5 (usado por Spring) ejecute Kotest
+test {
+    useJUnitPlatform()
 }

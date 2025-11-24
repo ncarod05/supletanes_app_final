@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProductoViewModel : ViewModel() {
-    private val repository = ProductoRepository()
-
+class ProductoViewModel(
+    private val repository: ProductoRepository = ProductoRepository() // O inyectado via DI
+) : ViewModel() {
     // Lista de productos
     private val _allProducts = MutableStateFlow<List<Producto>>(emptyList())
     val allProducts: StateFlow<List<Producto>> = _allProducts.asStateFlow()

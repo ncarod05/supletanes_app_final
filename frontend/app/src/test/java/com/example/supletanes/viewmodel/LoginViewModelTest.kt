@@ -1,10 +1,11 @@
 package com.example.supletanes.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.supletanes.model.LoginRequest
-import com.example.supletanes.model.LoginResponse
-import com.example.supletanes.model.User
-import com.example.supletanes.repository.AuthRepository
+import com.example.supletanes.data.model.LoginRequest
+import com.example.supletanes.data.model.LoginResponse
+import com.example.supletanes.data.model.User
+import com.example.supletanes.data.repository.AuthRepository
+import com.example.supletanes.ui.screens.auth.viewmodel.LoginViewModel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

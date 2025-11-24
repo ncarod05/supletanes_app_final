@@ -1,7 +1,7 @@
-package com.example.supletanes.repository
+package com.example.supletanes.data.repository
 
-import com.example.supletanes.model.LoginRequest
-import com.example.supletanes.model.LoginResponse
+import com.example.supletanes.data.model.LoginRequest
+import com.example.supletanes.data.model.LoginResponse
 import com.example.supletanes.data.network.AuthService
 
 class AuthRepository(private val authService: AuthService) {

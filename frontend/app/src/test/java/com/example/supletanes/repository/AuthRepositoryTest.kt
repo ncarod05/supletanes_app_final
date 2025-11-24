@@ -1,9 +1,10 @@
 package com.example.supletanes.repository
 
-import com.example.supletanes.model.LoginRequest
-import com.example.supletanes.model.LoginResponse
-import com.example.supletanes.model.User
+import com.example.supletanes.data.model.LoginRequest
+import com.example.supletanes.data.model.LoginResponse
+import com.example.supletanes.data.model.User
 import com.example.supletanes.data.network.AuthService
+import com.example.supletanes.data.repository.AuthRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi

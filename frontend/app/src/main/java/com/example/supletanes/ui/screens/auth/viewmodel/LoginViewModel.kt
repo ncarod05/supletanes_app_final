@@ -1,11 +1,11 @@
-package com.example.supletanes.viewmodel
+package com.example.supletanes.ui.screens.auth.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.supletanes.model.LoginRequest
-import com.example.supletanes.repository.AuthRepository
+import com.example.supletanes.data.model.LoginRequest
+import com.example.supletanes.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {

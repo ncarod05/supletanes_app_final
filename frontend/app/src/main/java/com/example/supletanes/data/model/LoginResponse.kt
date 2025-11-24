@@ -1,4 +1,4 @@
-package com.example.supletanes.model
+package com.example.supletanes.data.model
 
 data class LoginResponse(
     val token: String,

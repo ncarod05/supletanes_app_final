@@ -1,6 +1,8 @@
 Supletanes App - Gestión de Suplementos y Seguimiento Nutricional
 Aplicación móvil diseñada para ayudar a los usuarios a llevar un seguimiento de su plan de alimentación y gestionar su inventario de suplementos.
 
+Ruta para probar ENDPOINTS: https://supletanes-app-final.onrender.com
+
 Arquitectura y Tecnologías
 
 Frontend (Android):

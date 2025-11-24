@@ -1,4 +1,4 @@
-package cl.supletanes.supletanes_app.exception;
+/*package cl.supletanes.supletanes_app.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -15,3 +15,4 @@ public class ErrorResponse {
     private String message;
     private String path;
 }
+    */

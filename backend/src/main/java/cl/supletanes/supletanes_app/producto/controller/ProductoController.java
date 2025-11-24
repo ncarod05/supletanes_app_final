@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/api/productos")   //Ruta postman https://supletanes-app-final.onrender.com
 @CrossOrigin(origins = "*") //para conectar con la app
 @Tag(name = "Productos", description = "Gestión de productos")
 public class ProductoController {

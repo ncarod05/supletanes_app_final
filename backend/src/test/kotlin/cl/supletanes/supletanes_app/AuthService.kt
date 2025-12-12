@@ -1,6 +1,5 @@
 package cl.supletanes.supletanes_app.service
 
-// NO MÁS importaciones raras. Solo las necesarias.
 import androidx.compose.ui.semantics.password
 import cl.supletanes.supletanes_app.model.User
 import cl.supletanes.supletanes_app.repository.UserRepository

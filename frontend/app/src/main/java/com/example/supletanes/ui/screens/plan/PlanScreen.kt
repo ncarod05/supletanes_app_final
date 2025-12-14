@@ -4,10 +4,12 @@ package com.example.supletanes.ui.screens.plan
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -64,13 +66,14 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
-    /* --- AÑADIDO: 1. Estado para controlar la visibilidad del mapa --- */
+    /* Estado para controlar la visibilidad del mapa */
     var mapVisible by remember { mutableStateOf(false) }
 
-    /* --- AÑADIDO: 2. Envolvemos todo en un Box para superponer el mapa --- */
+    /* Envolvemos en un Box para superponer el mapa */
     Box(modifier = Modifier.fillMaxSize()) {
         val context = LocalContext.current
         val showCalendarDialog by planViewModel.showCalendarDialog.collectAsState()
@@ -119,7 +122,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         )
 
-        // --- Diálogos ---
+        // Diálogos
         if (showCalendarDialog) {
             DatePickerDialog(
                 onDismissRequest = { planViewModel.onDismissCalendar() },
@@ -298,7 +301,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 )
             }
 
-            /* --- AÑADIDO: 3. El botón que activa el mapa --- */
+            /* Botón que activa el mapa */
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
@@ -311,7 +314,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         }
 
-        /* --- AÑADIDO: 4. El mapa, que solo se muestra si el estado es 'true' --- */
+        /* El mapa, que solo se muestra si el estado es 'true' */
         AnimatedVisibility(
             visible = mapVisible,
             enter = fadeIn(),
@@ -347,9 +350,10 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PlanScreenPreview() {
-    // Para que el Preview no falle, pasamos un ViewModel de prueba o lo dejamos por defecto.
+    // Para que el Preview no falle, pasamos un ViewModel de prueba
     PlanScreen()
 }

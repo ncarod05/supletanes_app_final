@@ -122,6 +122,8 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         )
 
+        val foodInfo by planViewModel.foodInfo.collectAsState()
+
         // Diálogos
         if (showCalendarDialog) {
             DatePickerDialog(
@@ -244,10 +246,33 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                     image = desayunoImage.value,
                     onAddItemClicked = {
                         activeSection.value = "desayuno"
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
                 )
+
+                // Botón para buscar alimento
+                Button(
+                    onClick = { planViewModel.buscarAlimento("737628064502") }, // código de prueba
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Agregar alimento por código")
+                }
+
+                // Mostrar datos nutricionales si existen
+                val foodInfo by planViewModel.foodInfo.collectAsState()
+                foodInfo?.let { info ->
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text("Nombre: ${info.nombre}")
+                        Text("Calorías: ${info.calorias}")
+                        Text("Proteínas: ${info.proteinas} g")
+                        Text("Carbohidratos: ${info.carbohidratos} g")
+                        Text("Grasas: ${info.grasas} g")
+                    }
+                }
+
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
             }
+
 
             item {
                 PlanSection(

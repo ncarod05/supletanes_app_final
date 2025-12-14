@@ -1,4 +1,4 @@
-package cl.supletanes.supletanes_app;
+package cl.supletanes.supletanes_app.config;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

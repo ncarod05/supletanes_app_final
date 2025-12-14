@@ -7,6 +7,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.supletanes.data.api.FoodApi
+import com.example.supletanes.data.model.FoodDTO
 import com.example.supletanes.data.model.Recordatorio
 import com.example.supletanes.data.model.RecordatorioRequest
 import com.example.supletanes.data.network.ApiClient
@@ -15,6 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,6 +46,30 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
+
+    private val _foodInfo = MutableStateFlow<FoodDTO?>(null)
+    val foodInfo: StateFlow<FoodDTO?> = _foodInfo
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://supletanesappfinal-production.up.railway.app/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val foodApi = retrofit.create(FoodApi::class.java)
+
+    fun buscarAlimento(barcode: String) {
+        viewModelScope.launch {
+            try {
+                Log.d("PlanViewModel", "Buscando alimento con código: $barcode")
+                val result = foodApi.getFood(barcode)
+                _foodInfo.value = result
+                Log.d("PlanViewModel", "Resultado: $result")
+            } catch (e: Exception) {
+                Log.e("PlanViewModel", "Error al buscar alimento", e)
+            }
+        }
+    }
+
 
     // Lógica para obtener/crear un ID de dispositivo único
     private fun getDeviceUserId(): String {

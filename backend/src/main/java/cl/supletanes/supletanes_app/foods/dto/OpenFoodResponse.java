@@ -23,6 +23,8 @@ public class OpenFoodResponse {
     @Data
     public static class Nutriments {
         private Double energy_kcal_100g;
+        private Double energy_100g; // alternativa
+        private Double energy_kcal_serving; // otra variante
         private Double proteins_100g;
         private Double carbohydrates_100g;
         private Double fat_100g;

@@ -69,6 +69,19 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    private val _searchResults = MutableStateFlow<List<FoodDTO>>(emptyList())
+    val searchResults: StateFlow<List<FoodDTO>> = _searchResults
+
+    fun buscarPorNombre(name: String) {
+        viewModelScope.launch {
+            try {
+                val result = foodApi.searchFood(name)
+                _searchResults.value = result
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
 
     // Lógica para obtener/crear un ID de dispositivo único

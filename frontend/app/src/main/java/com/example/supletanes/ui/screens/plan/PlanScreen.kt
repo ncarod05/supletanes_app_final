@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -123,8 +124,6 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         )
 
-        val foodInfo by planViewModel.foodInfo.collectAsState()
-
         // Diálogos
         if (showCalendarDialog) {
             DatePickerDialog(
@@ -193,6 +192,9 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
         }
 
         val dailyGoalCalories = 2500
+        // Los collectAsState van aquí, dentro del Composable
+        val foodInfo by planViewModel.foodInfo.collectAsState()
+        val results by planViewModel.searchResults.collectAsState()
 
         LazyColumn(
             modifier = Modifier
@@ -239,6 +241,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
+            // --- Sección desayuno ---
             item {
                 PlanSection(
                     title = "Desayuno",
@@ -250,15 +253,10 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                     }
                 )
+            }
 
-                // Botón para buscar alimento
-                Button(
-                    onClick = { planViewModel.buscarAlimento("737628064502") }, // código de prueba
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Agregar alimento por código")
-                }
-
+            // --- Buscar por código ---
+            item {
                 var barcode by remember { mutableStateOf("") }
 
                 OutlinedTextField(
@@ -270,13 +268,11 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
 
                 Button(
                     onClick = { planViewModel.buscarAlimento(barcode) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 ) {
-                    Text("Buscar alimento")
+                    Text("Buscar por código")
                 }
 
-                // Mostrar datos nutricionales si existen
-                val foodInfo by planViewModel.foodInfo.collectAsState()
                 foodInfo?.let { info ->
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text("Nombre: ${info.nombre}")
@@ -286,9 +282,44 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                         Text("Grasas: ${info.grasas} g")
                     }
                 }
+            }
 
+            // --- Buscar por nombre ---
+            item {
+                var query by remember { mutableStateOf("") }
+
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Buscar alimento por nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(
+                    onClick = { planViewModel.buscarPorNombre(query) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Text("Buscar por nombre")
+                }
+            }
+
+            // --- Resultados de búsqueda por nombre ---
+            items(results) { food ->
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text("Nombre: ${food.nombre}")
+                    Text("Calorías: ${food.calorias}")
+                    Text("Proteínas: ${food.proteinas} g")
+                    Text("Carbohidratos: ${food.carbohidratos} g")
+                    Text("Grasas: ${food.grasas} g")
+                }
+                Divider()
+            }
+
+            // --- Separador final ---
+            item {
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
             }
+
 
 
             item {

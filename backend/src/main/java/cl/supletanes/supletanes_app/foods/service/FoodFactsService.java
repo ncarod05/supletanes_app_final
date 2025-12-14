@@ -18,24 +18,32 @@ public class FoodFactsService {
             OpenFoodResponse.Product p = response.getProduct();
             OpenFoodResponse.Nutriments n = p.getNutriments();
 
-            // Fallback para calorías
+            // Fallback para calorías y demas
             Double calorias = n.getEnergy_kcal_100g();
-            if (calorias == null || calorias == 0.0) {
+            if (calorias == null || calorias == 0.0)
                 calorias = n.getEnergy_100g();
-            }
-            if (calorias == null || calorias == 0.0) {
+            if (calorias == null || calorias == 0.0)
                 calorias = n.getEnergy_kcal_serving();
-            }
-            if (calorias == null) {
-                calorias = 0.0;
-            }
+
+            Double proteinas = n.getProteins_100g();
+            if (proteinas == null || proteinas == 0.0)
+                proteinas = n.getProteins_serving();
+
+            Double carbohidratos = n.getCarbohydrates_100g();
+            if (carbohidratos == null || carbohidratos == 0.0)
+                carbohidratos = n.getCarbohydrates_serving();
+
+            Double grasas = n.getFat_100g();
+            if (grasas == null || grasas == 0.0)
+                grasas = n.getFat_serving();
 
             return new FoodDTO(
                     p.getProduct_name(),
-                    n.getEnergy_kcal_100g(),
-                    n.getProteins_100g(),
-                    n.getCarbohydrates_100g(),
-                    n.getFat_100g());
+                    calorias != null ? calorias : 0.0,
+                    proteinas != null ? proteinas : 0.0,
+                    carbohidratos != null ? carbohidratos : 0.0,
+                    grasas != null ? grasas : 0.0
+                );
         }
         return new FoodDTO(null, 0.0, 0.0, 0.0, 0.0);
     }

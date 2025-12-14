@@ -35,6 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -256,6 +257,22 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Agregar alimento por código")
+                }
+
+                var barcode by remember { mutableStateOf("") }
+
+                OutlinedTextField(
+                    value = barcode,
+                    onValueChange = { barcode = it },
+                    label = { Text("Código de barras") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(
+                    onClick = { planViewModel.buscarAlimento(barcode) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Buscar alimento")
                 }
 
                 // Mostrar datos nutricionales si existen

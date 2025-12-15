@@ -56,5 +56,5 @@ Pasos para ejecutar:
 Ramas:
 
 Nicolas Caro: RamaCaro
-Christopher Espinoza: RamaCHR
+Christopher Espinoza/msgemmon-tech: RamaCHR
 Francisco Olate: RamaFObackend

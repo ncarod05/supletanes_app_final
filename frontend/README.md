@@ -37,6 +37,16 @@ Food:
 - /api/food/{barcode}
 - /api/food/api/food/search
 
+Codigo fuente micro servicio:
+
+Frontend:
+- frontend/app/src/main/java/com/example/supletanes/data/api/FoodApi.kt
+- frontend/app/src/main/java/com/example/supletanes/ui/screens/plan/PlanScreen.kt
+- frontend/app/src/main/java/com/example/supletanes/ui/screens/plan/viewmodel/PlanViewModel.kt
+
+Backend:
+- backend/src/main/java/cl/supletanes/supletanes_app/foods
+
 Pasos para ejecutar:
 - Iniciar app
 - Presionar botón de continuar

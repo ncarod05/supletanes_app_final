@@ -32,6 +32,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +61,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.supletanes.ui.components.TimePickerDialog
 import com.example.supletanes.ui.screens.plan.components.CalorieTracker
+import com.example.supletanes.ui.screens.plan.components.FoodSearchDialog
 import com.example.supletanes.ui.screens.plan.components.PlanSection
 import com.example.supletanes.ui.screens.plan.components.ProgressCheckInSection
 import com.example.supletanes.ui.screens.plan.components.WeekTimeline
@@ -195,6 +198,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
         // Los collectAsState van aquí, dentro del Composable
         val foodInfo by planViewModel.foodInfo.collectAsState()
         val results by planViewModel.searchResults.collectAsState()
+        var expanded by remember { mutableStateOf(false) }
 
         LazyColumn(
             modifier = Modifier
@@ -286,33 +290,17 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
 
             // --- Buscar por nombre ---
             item {
-                var query by remember { mutableStateOf("") }
-
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    label = { Text("Buscar alimento por nombre") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val showDialog = remember { mutableStateOf(false) }
 
                 Button(
-                    onClick = { planViewModel.buscarPorNombre(query) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                    onClick = { showDialog.value = true },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Buscar por nombre")
+                    Text("Buscar alimento por nombre")
                 }
-            }
 
-            // --- Resultados de búsqueda por nombre ---
-            items(results) { food ->
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Text("Nombre: ${food.nombre}")
-                    Text("Calorías: ${food.calorias}")
-                    Text("Proteínas: ${food.proteinas} g")
-                    Text("Carbohidratos: ${food.carbohidratos} g")
-                    Text("Grasas: ${food.grasas} g")
-                }
-                Divider()
+                // Aquí se renderiza el diálogo si showDialog = true
+                FoodSearchDialog(planViewModel, showDialog)
             }
 
             // --- Separador final ---

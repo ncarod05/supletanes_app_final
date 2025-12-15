@@ -53,28 +53,46 @@ public class FoodFactsService {
 
     public List<FoodDTO> searchProductsByName(String name) {
         String url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" + name + "&json=1";
+
+        // 1. Ver respuesta cruda
+        String rawJson = restTemplate.getForObject(url, String.class);
+        System.out.println("Respuesta cruda de OFF: " + rawJson);
+
+        // 2. Mapear al objeto
         OpenFoodSearchResponse response = restTemplate.getForObject(url, OpenFoodSearchResponse.class);
+
+        // 3. Ver cantidad de productos
+        if (response != null && response.getProducts() != null) {
+            System.out.println("Cantidad de productos: " + response.getProducts().size());
+        } else {
+            System.out.println("No se mapearon productos");
+        }
 
         List<FoodDTO> results = new ArrayList<>();
         if (response != null && response.getProducts() != null) {
             for (OpenFoodResponse.Product p : response.getProducts()) {
+                System.out.println("Producto encontrado: " + p.getProduct_name());
+
                 OpenFoodResponse.Nutriments n = p.getNutriments();
 
-                // Fallback para calorías
                 Double calorias = n.getEnergy_kcal_100g();
                 if (calorias == null || calorias == 0.0)
                     calorias = n.getEnergy_100g();
                 if (calorias == null || calorias == 0.0)
                     calorias = n.getEnergy_kcal_serving();
 
-                results.add(new FoodDTO(
+                FoodDTO dto = new FoodDTO(
                         p.getProduct_name(),
                         calorias != null ? calorias : 0.0,
                         n.getProteins_100g() != null ? n.getProteins_100g() : 0.0,
                         n.getCarbohydrates_100g() != null ? n.getCarbohydrates_100g() : 0.0,
-                        n.getFat_100g() != null ? n.getFat_100g() : 0.0));
+                        n.getFat_100g() != null ? n.getFat_100g() : 0.0);
+
+                System.out.println("DTO generado: " + dto);
+                results.add(dto);
             }
         }
+
         return results;
     }
 }

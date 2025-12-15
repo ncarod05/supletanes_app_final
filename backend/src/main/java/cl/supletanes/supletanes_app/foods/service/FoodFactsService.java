@@ -52,7 +52,8 @@ public class FoodFactsService {
     }
 
     public List<FoodDTO> searchProductsByName(String name) {
-        String url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" + name + "&json=1";
+        String url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms="
+                + name + "&json=1&page_size=10";
 
         // 1. Ver respuesta cruda
         String rawJson = restTemplate.getForObject(url, String.class);

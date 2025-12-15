@@ -83,6 +83,13 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun seleccionarAlimento(food: FoodDTO) {
+        // Guardar alimento seleccionado en el mismo estado para mostrar info
+        _foodInfo.value = food
+
+        // limpiar la lista de resultados para cerrar el menú de sugerencias
+        _searchResults.value = emptyList()
+    }
 
     // Lógica para obtener/crear un ID de dispositivo único
     private fun getDeviceUserId(): String {

@@ -60,6 +60,7 @@ public class FoodFactsService {
             for (OpenFoodResponse.Product p : response.getProducts()) {
                 OpenFoodResponse.Nutriments n = p.getNutriments();
 
+                // Fallback para calorías
                 Double calorias = n.getEnergy_kcal_100g();
                 if (calorias == null || calorias == 0.0)
                     calorias = n.getEnergy_100g();
@@ -69,9 +70,9 @@ public class FoodFactsService {
                 results.add(new FoodDTO(
                         p.getProduct_name(),
                         calorias != null ? calorias : 0.0,
-                        n.getProteins_100g(),
-                        n.getCarbohydrates_100g(),
-                        n.getFat_100g()));
+                        n.getProteins_100g() != null ? n.getProteins_100g() : 0.0,
+                        n.getCarbohydrates_100g() != null ? n.getCarbohydrates_100g() : 0.0,
+                        n.getFat_100g() != null ? n.getFat_100g() : 0.0));
             }
         }
         return results;

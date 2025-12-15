@@ -4,10 +4,12 @@ package com.example.supletanes.ui.screens.plan
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -33,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -64,13 +68,14 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
-    /* --- AÑADIDO: 1. Estado para controlar la visibilidad del mapa --- */
+    /* Estado para controlar la visibilidad del mapa */
     var mapVisible by remember { mutableStateOf(false) }
 
-    /* --- AÑADIDO: 2. Envolvemos todo en un Box para superponer el mapa --- */
+    /* Envolvemos en un Box para superponer el mapa */
     Box(modifier = Modifier.fillMaxSize()) {
         val context = LocalContext.current
         val showCalendarDialog by planViewModel.showCalendarDialog.collectAsState()
@@ -119,7 +124,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         )
 
-        // --- Diálogos ---
+        // Diálogos
         if (showCalendarDialog) {
             DatePickerDialog(
                 onDismissRequest = { planViewModel.onDismissCalendar() },
@@ -187,6 +192,9 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
         }
 
         val dailyGoalCalories = 2500
+        // Los collectAsState van aquí, dentro del Composable
+        val foodInfo by planViewModel.foodInfo.collectAsState()
+        val results by planViewModel.searchResults.collectAsState()
 
         LazyColumn(
             modifier = Modifier
@@ -233,6 +241,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
+            // --- Sección desayuno ---
             item {
                 PlanSection(
                     title = "Desayuno",
@@ -241,10 +250,77 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                     image = desayunoImage.value,
                     onAddItemClicked = {
                         activeSection.value = "desayuno"
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
                 )
+            }
+
+            // --- Buscar por código ---
+            item {
+                var barcode by remember { mutableStateOf("") }
+
+                OutlinedTextField(
+                    value = barcode,
+                    onValueChange = { barcode = it },
+                    label = { Text("Código de barras") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(
+                    onClick = { planViewModel.buscarAlimento(barcode) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Text("Buscar por código")
+                }
+
+                foodInfo?.let { info ->
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text("Nombre: ${info.nombre}")
+                        Text("Calorías: ${info.calorias}")
+                        Text("Proteínas: ${info.proteinas} g")
+                        Text("Carbohidratos: ${info.carbohidratos} g")
+                        Text("Grasas: ${info.grasas} g")
+                    }
+                }
+            }
+
+            // --- Buscar por nombre ---
+            item {
+                var query by remember { mutableStateOf("") }
+
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Buscar alimento por nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(
+                    onClick = { planViewModel.buscarPorNombre(query) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Text("Buscar por nombre")
+                }
+            }
+
+            // --- Resultados de búsqueda por nombre ---
+            items(results) { food ->
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text("Nombre: ${food.nombre}")
+                    Text("Calorías: ${food.calorias}")
+                    Text("Proteínas: ${food.proteinas} g")
+                    Text("Carbohidratos: ${food.carbohidratos} g")
+                    Text("Grasas: ${food.grasas} g")
+                }
+                Divider()
+            }
+
+            // --- Separador final ---
+            item {
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
             }
+
+
 
             item {
                 PlanSection(
@@ -298,7 +374,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 )
             }
 
-            /* --- AÑADIDO: 3. El botón que activa el mapa --- */
+            /* Botón que activa el mapa */
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
@@ -311,7 +387,7 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             }
         }
 
-        /* --- AÑADIDO: 4. El mapa, que solo se muestra si el estado es 'true' --- */
+        /* El mapa, que solo se muestra si el estado es 'true' */
         AnimatedVisibility(
             visible = mapVisible,
             enter = fadeIn(),
@@ -347,9 +423,10 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PlanScreenPreview() {
-    // Para que el Preview no falle, pasamos un ViewModel de prueba o lo dejamos por defecto.
+    // Para que el Preview no falle, pasamos un ViewModel de prueba
     PlanScreen()
 }

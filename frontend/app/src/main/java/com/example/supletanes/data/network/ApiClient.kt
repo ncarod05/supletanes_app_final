@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 object ApiClient {
 
     // URL base para conectar con el backend desplegado en Render
-    private const val BASE_URL = "https://supletanes-app-final.onrender.com/"
+    private const val BASE_URL = "https://supletanesappfinal-production.up.railway.app/"
 
     // Interceptor para loggear las peticiones y respuestas (muy útil para debug)
     private val loggingInterceptor = HttpLoggingInterceptor().apply {

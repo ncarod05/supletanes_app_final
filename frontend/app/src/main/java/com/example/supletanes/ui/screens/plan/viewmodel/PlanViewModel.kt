@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Instant
@@ -25,6 +26,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class PlanViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -50,8 +52,14 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
     private val _foodInfo = MutableStateFlow<FoodDTO?>(null)
     val foodInfo: StateFlow<FoodDTO?> = _foodInfo
 
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://supletanesappfinal-production.up.railway.app/")
+        .client(client) // aquí inyectas el cliente con timeout
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -59,13 +67,14 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
 
     fun buscarAlimento(barcode: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                Log.d("PlanViewModel", "Buscando alimento con código: $barcode")
                 val result = foodApi.getFood(barcode)
                 _foodInfo.value = result
-                Log.d("PlanViewModel", "Resultado: $result")
             } catch (e: Exception) {
-                Log.e("PlanViewModel", "Error al buscar alimento", e)
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -89,15 +98,19 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
         _activeSection.value = section
     }
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     fun buscarPorNombre(name: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                val result = foodApi.searchFood(name) // esto ya es una lista
+                val result = foodApi.searchFood(name)
                 _searchResults.value = result
             } catch (e: Exception) {
-                e.printStackTrace()
+                _mensajeError.value = "Error al buscar: ${e.message}"
             }
+            _isLoading.value = false
         }
     }
 

@@ -10,9 +10,41 @@ Integrantes:
 Funcionalidades Implementadas:
 - Formulario de Registro
 - Formulario de Inicio De Sesión
+- Autenticación de usuarios
+- Plan alimenticio
+- Control de configuraciones basicas
+
+Endpoints:
+
+https://supletanesappfinal-production.up.railway.app/swagger-ui/index.html#
+https://supletanesappfinal-production.up.railway.app/
+
+Productos:
+- GET /api/productos
+- GET /api/productos/{id}
+- GET /api/productos/categoria/{categoria}
+- POST /api/productos
+- PUT /api/productos/{id}
+- DELETE /api/productos/{id}
+
+Recordatorios:
+- POST /api/v1/recordatorios
+- GET /api/v1/recordatorios/usuario/{idUsuario}
+- PUT /api/v1/recordatorios/{id}
+- DELETE /api/v1/recordatorios/{id}
+
+Food:
+- /api/food/{barcode}
+- /api/food/api/food/search
 
 Pasos para ejecutar:
 - Iniciar app
 - Presionar botón de continuar
 - Iniciar sesión o continuar como invitado
 - Acceder a las diferentes opciones y pantallas disponibles
+
+Ramas:
+
+Nicolas Caro: RamaCaro
+Christopher Espinoza: RamaCHR
+Francisco Olate: RamaFObackend

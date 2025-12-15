@@ -75,7 +75,7 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
     fun buscarPorNombre(name: String) {
         viewModelScope.launch {
             try {
-                val result = foodApi.searchFood(name)
+                val result = foodApi.searchFood(name) // esto ya es una lista
                 _searchResults.value = result
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -26,7 +26,7 @@ public class FoodController {
         return foodFactsService.getProductByBarcode(barcode);
     }
 
-    @GetMapping("/api/food/search")
+    @GetMapping("/search")
     public List<FoodDTO> searchFood(@RequestParam String name) {
         return foodFactsService.searchProductsByName(name);
     }

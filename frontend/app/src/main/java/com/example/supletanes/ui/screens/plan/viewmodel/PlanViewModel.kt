@@ -72,6 +72,24 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
     private val _searchResults = MutableStateFlow<List<FoodDTO>>(emptyList())
     val searchResults: StateFlow<List<FoodDTO>> = _searchResults
 
+    private val _desayuno = MutableStateFlow<List<FoodDTO>>(emptyList())
+    val desayuno: StateFlow<List<FoodDTO>> = _desayuno
+
+    private val _almuerzo = MutableStateFlow<List<FoodDTO>>(emptyList())
+    val almuerzo: StateFlow<List<FoodDTO>> = _almuerzo
+
+    private val _cena = MutableStateFlow<List<FoodDTO>>(emptyList())
+    val cena: StateFlow<List<FoodDTO>> = _cena
+
+    // sección activa (ej. "desayuno", "almuerzo", "cena")
+    private val _activeSection = MutableStateFlow<String?>(null)
+    val activeSection: StateFlow<String?> = _activeSection
+
+    fun setActiveSection(section: String) {
+        _activeSection.value = section
+    }
+
+
     fun buscarPorNombre(name: String) {
         viewModelScope.launch {
             try {
@@ -84,11 +102,13 @@ class PlanViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun seleccionarAlimento(food: FoodDTO) {
-        // Guardar alimento seleccionado en el mismo estado para mostrar info
-        _foodInfo.value = food
-
-        // limpiar la lista de resultados para cerrar el menú de sugerencias
-        _searchResults.value = emptyList()
+        when (_activeSection.value) {
+            "desayuno" -> _desayuno.value = _desayuno.value + food
+            "almuerzo" -> _almuerzo.value = _almuerzo.value + food
+            "cena" -> _cena.value = _cena.value + food
+            else -> _foodInfo.value = food // fallback si no hay sección activa
+        }
+        _searchResults.value = emptyList() // limpiar sugerencias
     }
 
     // Lógica para obtener/crear un ID de dispositivo único

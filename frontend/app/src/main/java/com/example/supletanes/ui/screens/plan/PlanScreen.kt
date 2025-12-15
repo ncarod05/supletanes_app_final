@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.supletanes.ui.components.TimePickerDialog
+import com.example.supletanes.ui.screens.plan.components.BarcodeSearchDialog
 import com.example.supletanes.ui.screens.plan.components.CalorieTracker
 import com.example.supletanes.ui.screens.plan.components.FoodSearchDialog
 import com.example.supletanes.ui.screens.plan.components.PlanSection
@@ -247,6 +248,8 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
 
             // --- Sección desayuno ---
             item {
+                val desayunoItems by planViewModel.desayuno.collectAsState()
+
                 PlanSection(
                     title = "Desayuno",
                     sectionCalories = 450,
@@ -257,35 +260,31 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                     }
                 )
-            }
 
-            // --- Buscar por código ---
-            item {
-                var barcode by remember { mutableStateOf("") }
-
-                OutlinedTextField(
-                    value = barcode,
-                    onValueChange = { barcode = it },
-                    label = { Text("Código de barras") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Button(
-                    onClick = { planViewModel.buscarAlimento(barcode) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                ) {
-                    Text("Buscar por código")
-                }
-
-                foodInfo?.let { info ->
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text("Nombre: ${info.nombre}")
-                        Text("Calorías: ${info.calorias}")
-                        Text("Proteínas: ${info.proteinas} g")
-                        Text("Carbohidratos: ${info.carbohidratos} g")
-                        Text("Grasas: ${info.grasas} g")
+                // Mostrar los alimentos agregados debajo del botón
+                Column(modifier = Modifier.padding(8.dp)) {
+                    desayunoItems.forEach { food ->
+                        Text("${food.nombre} - ${food.calorias} kcal")
                     }
                 }
+            }
+
+
+            // --- Buscar por código/QR ---
+            item {
+                val showBarcodeDialog = remember { mutableStateOf(false) }
+
+                Button(
+                    onClick = {
+                        planViewModel.setActiveSection("desayuno") // marcar sección activa
+                        showBarcodeDialog.value = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Buscar alimento por código/QR")
+                }
+
+                BarcodeSearchDialog(planViewModel, showBarcodeDialog)
             }
 
             // --- Buscar por nombre ---
@@ -293,13 +292,15 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
                 val showDialog = remember { mutableStateOf(false) }
 
                 Button(
-                    onClick = { showDialog.value = true },
+                    onClick = {
+                        planViewModel.setActiveSection("desayuno") // marcar sección activa
+                        showDialog.value = true
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Buscar alimento por nombre")
                 }
 
-                // Aquí se renderiza el diálogo si showDialog = true
                 FoodSearchDialog(planViewModel, showDialog)
             }
 
@@ -307,8 +308,6 @@ fun PlanScreen(planViewModel: PlanViewModel = viewModel()) {
             item {
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
             }
-
-
 
             item {
                 PlanSection(

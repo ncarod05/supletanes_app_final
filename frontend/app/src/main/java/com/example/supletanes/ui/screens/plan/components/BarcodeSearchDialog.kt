@@ -1,5 +1,6 @@
 package com.example.supletanes.ui.screens.plan.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -51,10 +53,10 @@ fun BarcodeSearchDialog(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    val isLoading by planViewModel.isLoading.collectAsState()
+
                     Button(
-                        onClick = {
-                            planViewModel.buscarAlimento(barcode)
-                        },
+                        onClick = { planViewModel.buscarAlimento(barcode) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Buscar")
@@ -62,13 +64,22 @@ fun BarcodeSearchDialog(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    foodInfo?.let { info ->
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Text("Nombre: ${info.nombre}")
-                            Text("Calorías: ${info.calorias}")
-                            Text("Proteínas: ${info.proteinas} g")
-                            Text("Carbohidratos: ${info.carbohidratos} g")
-                            Text("Grasas: ${info.grasas} g")
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        foodInfo?.let { info ->
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Text("Nombre: ${info.nombre}")
+                                Text("Calorías: ${info.calorias}")
+                                Text("Proteínas: ${info.proteinas} g")
+                                Text("Carbohidratos: ${info.carbohidratos} g")
+                                Text("Grasas: ${info.grasas} g")
+                            }
                         }
                     }
 

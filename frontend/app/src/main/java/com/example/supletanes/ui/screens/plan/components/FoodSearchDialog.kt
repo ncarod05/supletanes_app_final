@@ -1,6 +1,7 @@
 package com.example.supletanes.ui.screens.plan.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.supletanes.ui.screens.plan.viewmodel.PlanViewModel
@@ -48,6 +51,13 @@ fun FoodSearchDialog(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Buscar alimento", style = MaterialTheme.typography.titleLarge)
 
+                    val isLoading by planViewModel.isLoading.collectAsState()
+
+                    val mensajeError by planViewModel.mensajeError.collectAsState()
+                    if (mensajeError != null) {
+                        Text(mensajeError!!, color = Color.Red)
+                    }
+
                     OutlinedTextField(
                         value = query,
                         onValueChange = {
@@ -60,25 +70,34 @@ fun FoodSearchDialog(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 300.dp) // limitar altura
-                    ) {
-                        items(results) { food ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        planViewModel.seleccionarAlimento(food)
-                                        showDialog.value = false
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.heightIn(max = 300.dp)
+                        ) {
+                            items(results) { food ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            planViewModel.seleccionarAlimento(food)
+                                            showDialog.value = false
+                                        }
+                                        .padding(8.dp)
+                                ) {
+                                    Column {
+                                        Text(food.nombre ?: "Sin nombre")
+                                        Text("Calorías: ${food.calorias}", style = MaterialTheme.typography.bodySmall)
                                     }
-                                    .padding(8.dp)
-                            ) {
-                                Column {
-                                    Text(food.nombre ?: "Sin nombre")
-                                    Text("Calorías: ${food.calorias}", style = MaterialTheme.typography.bodySmall)
                                 }
+                                Divider()
                             }
-                            Divider()
                         }
                     }
 

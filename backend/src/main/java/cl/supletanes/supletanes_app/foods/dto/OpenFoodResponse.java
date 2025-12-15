@@ -11,13 +11,11 @@ import lombok.NoArgsConstructor;
 public class OpenFoodResponse {
     private Product product;
 
-    // getters y setters
     @Data
     public static class Product {
         private String product_name;
         private Nutriments nutriments;
 
-        // getters y setters
     }
 
     @Data

@@ -1,10 +1,14 @@
 package cl.supletanes.supletanes_app.foods.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import cl.supletanes.supletanes_app.foods.dto.FoodDTO;
 import cl.supletanes.supletanes_app.foods.dto.OpenFoodResponse;
+import cl.supletanes.supletanes_app.foods.dto.OpenFoodSearchResponse;
 
 @Service
 public class FoodFactsService {
@@ -42,9 +46,34 @@ public class FoodFactsService {
                     calorias != null ? calorias : 0.0,
                     proteinas != null ? proteinas : 0.0,
                     carbohidratos != null ? carbohidratos : 0.0,
-                    grasas != null ? grasas : 0.0
-                );
+                    grasas != null ? grasas : 0.0);
         }
         return new FoodDTO(null, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    public List<FoodDTO> searchProductsByName(String name) {
+        String url = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" + name + "&json=1";
+        OpenFoodSearchResponse response = restTemplate.getForObject(url, OpenFoodSearchResponse.class);
+
+        List<FoodDTO> results = new ArrayList<>();
+        if (response != null && response.getProducts() != null) {
+            for (OpenFoodResponse.Product p : response.getProducts()) {
+                OpenFoodResponse.Nutriments n = p.getNutriments();
+
+                Double calorias = n.getEnergy_kcal_100g();
+                if (calorias == null || calorias == 0.0)
+                    calorias = n.getEnergy_100g();
+                if (calorias == null || calorias == 0.0)
+                    calorias = n.getEnergy_kcal_serving();
+
+                results.add(new FoodDTO(
+                        p.getProduct_name(),
+                        calorias != null ? calorias : 0.0,
+                        n.getProteins_100g(),
+                        n.getCarbohydrates_100g(),
+                        n.getFat_100g()));
+            }
+        }
+        return results;
     }
 }
